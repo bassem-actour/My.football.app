@@ -1,0 +1,50 @@
+<script>
+    // 1.  a6af9837cb044608bb0451338f417fa8
+    const API_KEY='a6af9837cb044608bb0451338f417fa8'; 
+    const URL = 'https://api.football-data.org/v4/matches';
+
+    // 2. هذه الدالة تجلب البيانات وتحدث الصفحة تلقائياً
+    async function getLiveMatches() {
+        try {
+            const response = await fetch(URL, {
+                headers: { 'X-Auth-Token': API_KEY }
+            });
+            const data = await response.json();
+            
+            const container = document.getElementById('matches-container');
+            container.innerHTML = ''; // تنظيف القائمة القديمة
+
+            data.matches.forEach(match => {
+                // إضافة كل مباراة بتنسيقها الجديد مع الشعارات
+                container.innerHTML += `
+                    <div class="match-card">
+                        <div class="team-box">
+                            <img src="${match.homeTeam.crest}" width="30">
+                            <span class="team-name">${match.homeTeam.shortName}</span>
+                            <span class="score">${match.score.fullTime.home ?? 0}</span>
+                        </div>
+                        <div class="match-center">
+                            <div class="live-indicator">${match.status === 'IN_PLAY' ? '● مباشر' : 'قريباً'}</div>
+                            <span class="game-time">${new Date(match.utcDate).toLocaleTimeString('ar-EG')}</span>
+                        </div>
+                        <div class="team-box">
+                            <span class="score">${match.score.fullTime.away ?? 0}</span>
+                            <span class="team-name">${match.awayTeam.shortName}</span>
+                            <img src="${match.awayTeam.crest}" width="30">
+                        </div>
+                    </div>
+                `;
+            });
+        } catch (error) {
+            console.error("عذراً، حدث خطأ في الاتصال بالسيرفر");
+        }
+    }
+
+    // تشغيل الدالة فور فتح الصفحة
+    getLiveMatches();
+    
+    // تحديث البيانات كل دقيقتين تلقائياً
+    setInterval(getLiveMatches, 120000);
+</script>
+</body>
+</html>
